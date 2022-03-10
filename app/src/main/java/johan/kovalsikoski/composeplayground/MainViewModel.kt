@@ -17,6 +17,18 @@ class MainViewModel : ViewModel() {
         )
     }
 
+    fun clearNotificatons() {
+        _state.value = state.value.copy(
+            notifications = 0
+        )
+    }
+
+    fun hasNotifications() = state.value.notifications > 0
+
+    fun getCurrentPage() = state.value.page
+
+    fun getNotificationQuantity() = state.value.notifications
+
     fun onPageChange(page: ScreenPage) {
         _state.value = state.value.copy(
             page = page

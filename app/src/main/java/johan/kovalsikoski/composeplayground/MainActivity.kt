@@ -10,10 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,10 +20,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import johan.kovalsikoski.composeplayground.data.ScreenPage
 import johan.kovalsikoski.composeplayground.ui.theme.ComposePlaygroundTheme
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -84,20 +81,30 @@ private fun TopBar(scaffoldState: ScaffoldState) {
 
 @Composable
 private fun BottomNavigationWithBadgeBox(
-    notifications: Int
+    viewModel: MainViewModel
 ) {
     val context = LocalContext.current
 
-    var isSelected by remember { mutableStateOf(false) }
-
     BottomNavigation {
         BottomNavigationItem(
-            selected = isSelected,
+            selected = viewModel.getCurrentPage() == ScreenPage.MainPage,
+            icon = { Icon(Icons.Filled.Person, "Profile") },
+            onClick = {
+                viewModel.onPageChange(ScreenPage.MainPage)
+            }
+        )
+
+        BottomNavigationItem(
+            selected = viewModel.getCurrentPage() == ScreenPage.MessagePage,
             icon = {
                 BadgedBox(badge = {
-                    if (!isSelected) {
+                    if (viewModel.getCurrentPage() != ScreenPage.MessagePage && viewModel.hasNotifications()) {
                         Badge(backgroundColor = Color.Red) {
-                            Text(text = "$notifications", color = Color.Black, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = "${viewModel.getNotificationQuantity()}",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }) {
@@ -105,8 +112,8 @@ private fun BottomNavigationWithBadgeBox(
                 }
             },
             onClick = {
-                isSelected = !isSelected
-                Toast.makeText(context, "Settings Click", Toast.LENGTH_SHORT).show()
+                viewModel.onPageChange(ScreenPage.MessagePage)
+                Toast.makeText(context, "Message Page Click", Toast.LENGTH_SHORT).show()
             })
     }
 }
@@ -135,9 +142,11 @@ private fun DrawerContent() {
             }
         }
         Crossfade(targetState = currentColor, animationSpec = tween(3000)) { selectedColor ->
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .background(selectedColor.color))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(selectedColor.color)
+            )
         }
     }
 }
@@ -151,82 +160,123 @@ private fun MainActivityContent() {
         scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
         topBar = { TopBar(scaffoldState) },
-        bottomBar = { BottomNavigationWithBadgeBox(viewModel.state.value.notifications) },
+        bottomBar = { BottomNavigationWithBadgeBox(viewModel) },
         drawerContent = { DrawerContent() },
         content = {
-            ConstraintLayout(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
-            ) {
-                val (boxRed, boxGreen, boxBlue, textCoveredByBlue, textAboveAll, textMessage, buttonAddNotification) = createRefs()
-
-                // Box overlap each other
-                Box(
-                    modifier = Modifier
-                        .size(90.dp)
-                        .background(color = Color.Red)
-                        .constrainAs(boxRed) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                        }
-                )
-
-                Box(
-                    modifier = Modifier
-                        .size(90.dp)
-                        .background(color = Color.Green)
-                        .constrainAs(boxGreen) {
-                            top.linkTo(boxRed.top)
-                            start.linkTo(boxRed.start, margin = 55.dp)
-                        }
-                )
-
-                Text(text = "Covered by the blue box",
-                    modifier = Modifier
-                        .background(color = Color.Yellow)
-                        .constrainAs(textCoveredByBlue) {
-                            width = Dimension.fillToConstraints
-                            top.linkTo(boxRed.top)
-                            start.linkTo(boxRed.start)
-                            bottom.linkTo(boxRed.bottom)
-                        },)
-
-                Box(
-                    modifier = Modifier
-                        .size(90.dp)
-                        .background(color = Color.Blue)
-                        .constrainAs(boxBlue) {
-                            top.linkTo(boxGreen.top)
-                            start.linkTo(boxGreen.start, margin = 55.dp)
-                        }
-                )
-
-                Greeting(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .constrainAs(textMessage) {
-                            centerTo(parent)
-                        },
-                    text = "Johan Vidal Kovalsikoski"
-                )
-
-                Button(
-                    modifier = Modifier
-                        .constrainAs(buttonAddNotification) {
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        bottom.linkTo(parent.bottom)
-                    },
-                    onClick = {
-                        viewModel.onAddNotification()
-                    }
-                ) {
-                    Text(text = "ADD NOTIFICATION")
-                }
+            if (viewModel.getCurrentPage() == ScreenPage.MainPage) {
+                MainContent(it, viewModel)
+            } else {
+                MessageContent(it, viewModel)
             }
         }
     )
+}
+
+@Composable
+private fun MessageContent(paddingValues: PaddingValues, viewModel: MainViewModel) {
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
+        val (textMessages, buttonReadMessages) = createRefs()
+
+        Text(
+            text = "Notifications here: ${viewModel.getNotificationQuantity()}",
+            modifier = Modifier.constrainAs(textMessages) {
+                centerTo(parent)
+            },
+        )
+
+        Button(
+            modifier = Modifier.constrainAs(buttonReadMessages) {
+                centerVerticallyTo(parent, bias = 1f)
+                centerHorizontallyTo(parent)
+            },
+            onClick = {
+                viewModel.clearNotificatons()
+            }) {
+            Text(text = "Click to read all messages")
+        }
+
+    }
+}
+
+@Composable
+private fun MainContent(paddingValues: PaddingValues, viewModel: MainViewModel) {
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
+        val (boxRed, boxGreen, boxBlue, textCoveredByBlue, textAboveAll, textMessage, buttonAddNotification) = createRefs()
+
+        // Box overlap each other
+        Box(
+            modifier = Modifier
+                .size(90.dp)
+                .background(color = Color.Red)
+                .constrainAs(boxRed) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                }
+        )
+
+        Box(
+            modifier = Modifier
+                .size(90.dp)
+                .background(color = Color.Green)
+                .constrainAs(boxGreen) {
+                    top.linkTo(boxRed.top)
+                    start.linkTo(boxRed.start, margin = 55.dp)
+                }
+        )
+
+        Text(
+            text = "Covered by the blue box",
+            modifier = Modifier
+                .background(color = Color.Yellow)
+                .constrainAs(textCoveredByBlue) {
+                    width = Dimension.fillToConstraints
+                    top.linkTo(boxRed.top)
+                    start.linkTo(boxRed.start)
+                    bottom.linkTo(boxRed.bottom)
+                },
+        )
+
+        Box(
+            modifier = Modifier
+                .size(90.dp)
+                .background(color = Color.Blue)
+                .constrainAs(boxBlue) {
+                    top.linkTo(boxGreen.top)
+                    start.linkTo(boxGreen.start, margin = 55.dp)
+                }
+        )
+
+        Greeting(
+            modifier = Modifier
+                .wrapContentSize()
+                .constrainAs(textMessage) {
+                    centerTo(parent)
+                },
+            text = "Johan Vidal Kovalsikoski"
+        )
+
+        Button(
+            modifier = Modifier
+                .constrainAs(buttonAddNotification) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                },
+            onClick = {
+                viewModel.onAddNotification()
+            }
+        ) {
+            Text(text = "ADD NOTIFICATION")
+        }
+    }
 }
 
 @Preview(showBackground = true)
