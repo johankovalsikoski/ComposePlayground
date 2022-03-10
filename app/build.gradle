@@ -58,13 +58,22 @@ dependencies {
     implementation "androidx.activity:activity-compose:1.4.0" // ComponentActivity
 
     implementation "androidx.compose.ui:ui:$compose_version" // basic ui elements
-    implementation "androidx.compose.material:material:$compose_version" // material design elements, soon material3
+    implementation "androidx.compose.material:material:$compose_version"
+    // material design elements, soon material3
     implementation "androidx.compose.animation:animation:$compose_version" // animation classes
-    implementation "androidx.compose.foundation:foundation:$compose_version" // complement for ui elements
+    implementation "androidx.compose.foundation:foundation:$compose_version"
+    // complement for ui elements
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version" // preview tools
-    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0" // Constraint Layout for Compose (different version control)
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0"
+    // Constraint Layout for Compose (different version control)
 
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
+    // endregion
+
+    // region Koin
+    implementation "io.insert-koin:koin-core:$koin_version" // Koin Core features
+    implementation "io.insert-koin:koin-androidx-navigation:$koin_version" // Navigation Graph
+    implementation "io.insert-koin:koin-androidx-compose:$koin_version" // Jetpack Compose
     // endregion
 }

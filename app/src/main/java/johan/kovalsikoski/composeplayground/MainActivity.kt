@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -23,6 +25,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import johan.kovalsikoski.composeplayground.ui.theme.ComposePlaygroundTheme
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.viewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -79,7 +83,9 @@ private fun TopBar(scaffoldState: ScaffoldState) {
 }
 
 @Composable
-private fun BottomNavigationWithBadgeBox() {
+private fun BottomNavigationWithBadgeBox(
+    notifications: Int
+) {
     val context = LocalContext.current
 
     var isSelected by remember { mutableStateOf(false) }
@@ -91,7 +97,7 @@ private fun BottomNavigationWithBadgeBox() {
                 BadgedBox(badge = {
                     if (!isSelected) {
                         Badge(backgroundColor = Color.Red) {
-                            Text(text = "10", color = Color.Black, fontWeight = FontWeight.Bold)
+                            Text(text = "$notifications", color = Color.Black, fontWeight = FontWeight.Bold)
                         }
                     }
                 }) {
@@ -105,18 +111,48 @@ private fun BottomNavigationWithBadgeBox() {
     }
 }
 
+enum class MyColors(val color: Color) {
+    Red(Color.Red), Green(Color.Green), Blue(Color.Blue)
+}
+
+@Composable
+private fun DrawerContent() {
+    var currentColor by remember { mutableStateOf(MyColors.Red) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row {
+            MyColors.values().forEach { myColor ->
+                Button(
+                    onClick = { currentColor = myColor },
+                    modifier = Modifier
+                        .weight(1f, fill = true)
+                        .height(48.dp)
+                        .background(myColor.color),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = myColor.color)
+                ) {
+                    Text(text = myColor.name)
+                }
+            }
+        }
+        Crossfade(targetState = currentColor, animationSpec = tween(3000)) { selectedColor ->
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .background(selectedColor.color))
+        }
+    }
+}
+
 @Composable
 private fun MainActivityContent() {
     val scaffoldState = rememberScaffoldState()
+    val viewModel by viewModel<MainViewModel>()
 
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
         topBar = { TopBar(scaffoldState) },
-        bottomBar = { BottomNavigationWithBadgeBox() },
-        drawerContent = {
-            Text(text = "Drawer Item")
-        },
+        bottomBar = { BottomNavigationWithBadgeBox(viewModel.state.value.notifications) },
+        drawerContent = { DrawerContent() },
         content = {
             ConstraintLayout(
                 modifier = Modifier
@@ -176,13 +212,14 @@ private fun MainActivityContent() {
                 )
 
                 Button(
-                    modifier = Modifier.constrainAs(buttonAddNotification) {
+                    modifier = Modifier
+                        .constrainAs(buttonAddNotification) {
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                         bottom.linkTo(parent.bottom)
                     },
                     onClick = {
-                        // TODO: Find a way to update notifications
+                        viewModel.onAddNotification()
                     }
                 ) {
                     Text(text = "ADD NOTIFICATION")
