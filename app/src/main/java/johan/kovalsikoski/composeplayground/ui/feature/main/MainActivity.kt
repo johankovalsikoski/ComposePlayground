@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun Greeting(
     modifier: Modifier = Modifier,
-    text: String
+    text: String = ""
 ) {
     Text(modifier = modifier, text = "Hello $text!")
 }
@@ -85,6 +85,7 @@ private fun TopBar(scaffoldState: ScaffoldState) {
 
 @Composable
 private fun BottomNavigationWithBadgeBox(
+    @PreviewParameter(MainViewModelPreviewParam::class)
     viewModel: MainViewModel
 ) {
     val context = LocalContext.current
@@ -156,7 +157,10 @@ private fun DrawerContent() {
 }
 
 @Composable
-private fun MainActivityContent(viewModel: MainViewModel = getViewModel()) {
+private fun MainActivityContent(
+    @PreviewParameter(MainViewModelPreviewParam::class)
+    viewModel: MainViewModel = getViewModel()
+) {
     val scaffoldState = rememberScaffoldState()
 
     Scaffold(
@@ -167,7 +171,7 @@ private fun MainActivityContent(viewModel: MainViewModel = getViewModel()) {
         drawerContent = { DrawerContent() },
         content = {
             if (viewModel.getCurrentPage() == ScreenPage.MainPage) {
-                MainContent(it, viewModel)
+                MainContent(viewModel, it)
             } else {
                 MessageContent(viewModel, it)
             }
@@ -175,10 +179,8 @@ private fun MainActivityContent(viewModel: MainViewModel = getViewModel()) {
     )
 }
 
-@Preview(name = "Message Content", showBackground = true)
 @Composable
 private fun MessageContent(
-    @PreviewParameter(MainViewModelPreviewParam::class)
     viewModel: MainViewModel,
     paddingValues: PaddingValues = PaddingValues(8.dp)
 ) {
@@ -211,7 +213,10 @@ private fun MessageContent(
 }
 
 @Composable
-private fun MainContent(paddingValues: PaddingValues, viewModel: MainViewModel) {
+private fun MainContent(
+    viewModel: MainViewModel = getViewModel(),
+    paddingValues: PaddingValues = PaddingValues(8.dp)
+) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
@@ -287,7 +292,7 @@ private fun MainContent(paddingValues: PaddingValues, viewModel: MainViewModel) 
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun DefaultPreview() {
     ComposePlaygroundTheme {
