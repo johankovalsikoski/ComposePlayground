@@ -1,4 +1,4 @@
-package johan.kovalsikoski.composeplayground
+package johan.kovalsikoski.composeplayground.ui.feature.main
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf

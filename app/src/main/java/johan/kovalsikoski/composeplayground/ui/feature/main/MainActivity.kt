@@ -1,5 +1,6 @@
-package johan.kovalsikoski.composeplayground
+package johan.kovalsikoski.composeplayground.ui.feature.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -17,13 +18,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import johan.kovalsikoski.composeplayground.data.ScreenPage
+import johan.kovalsikoski.composeplayground.preview_parameter.MainViewModelPreviewParam
+import johan.kovalsikoski.composeplayground.ui.feature.canvas.CanvasActivity
 import johan.kovalsikoski.composeplayground.ui.theme.ComposePlaygroundTheme
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.viewModel
+import org.koin.androidx.compose.getViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -65,9 +69,9 @@ private fun TopBar(scaffoldState: ScaffoldState) {
                 }
             }, actions = {
                 IconButton(onClick = {
-                    Toast.makeText(context, "Share Click", Toast.LENGTH_SHORT).show()
+                    context.startActivity(Intent(context, CanvasActivity::class.java))
                 }) {
-                    Icon(Icons.Filled.Share, "Share")
+                    Icon(Icons.Filled.ArrowForward, "Next Screen")
                 }
                 IconButton(onClick = {
                     Toast.makeText(context, "Settings Click", Toast.LENGTH_SHORT).show()
@@ -152,9 +156,8 @@ private fun DrawerContent() {
 }
 
 @Composable
-private fun MainActivityContent() {
+private fun MainActivityContent(viewModel: MainViewModel = getViewModel()) {
     val scaffoldState = rememberScaffoldState()
-    val viewModel by viewModel<MainViewModel>()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -166,14 +169,19 @@ private fun MainActivityContent() {
             if (viewModel.getCurrentPage() == ScreenPage.MainPage) {
                 MainContent(it, viewModel)
             } else {
-                MessageContent(it, viewModel)
+                MessageContent(viewModel, it)
             }
         }
     )
 }
 
+@Preview(name = "Message Content", showBackground = true)
 @Composable
-private fun MessageContent(paddingValues: PaddingValues, viewModel: MainViewModel) {
+private fun MessageContent(
+    @PreviewParameter(MainViewModelPreviewParam::class)
+    viewModel: MainViewModel,
+    paddingValues: PaddingValues = PaddingValues(8.dp)
+) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
@@ -209,7 +217,7 @@ private fun MainContent(paddingValues: PaddingValues, viewModel: MainViewModel) 
             .fillMaxSize()
             .padding(paddingValues)
     ) {
-        val (boxRed, boxGreen, boxBlue, textCoveredByBlue, textAboveAll, textMessage, buttonAddNotification) = createRefs()
+        val (boxRed, boxGreen, boxBlue, textCoveredByBlue, textMessage, buttonAddNotification) = createRefs()
 
         // Box overlap each other
         Box(

@@ -2,7 +2,10 @@ package johan.kovalsikoski.composeplayground.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple200 = Color(0xFFBB86FC)
-val Purple500 = Color(0xFF6200EE)
-val Purple700 = Color(0xFF3700B3)
-val Teal200 = Color(0xFF03DAC5)
+val Green300 = Color(0xFF81C784)
+val Green500 = Color(0xFF4CAF50)
+val Green700 = Color(0xFF388E3C)
+
+val Purple300 = Color(0xFF9575CD)
+val Purple500 = Color(0xFF673AB7)
+val Purple700 = Color(0xFF512DA8)
