@@ -1,15 +1,15 @@
-package johan.kovalsikoski.composeplayground.ui.feature.main
+package johan.kovalsikoski.composeplayground.ui.feature.first_screen
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import johan.kovalsikoski.composeplayground.data.MainState
+import johan.kovalsikoski.composeplayground.data.FirstScreenState
 import johan.kovalsikoski.composeplayground.data.ScreenPage
 
-class MainViewModel : ViewModel() {
+class FirstScreenViewModel : ViewModel() {
 
-    private val _state = mutableStateOf(MainState())
-    val state: State<MainState> = _state
+    private val _state = mutableStateOf(FirstScreenState())
+    val state: State<FirstScreenState> = _state
 
     fun onAddNotification() {
         _state.value = state.value.copy(

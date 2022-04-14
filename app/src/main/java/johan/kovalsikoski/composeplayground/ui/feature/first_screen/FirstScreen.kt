@@ -1,10 +1,7 @@
-package johan.kovalsikoski.composeplayground.ui.feature.main
+package johan.kovalsikoski.composeplayground.ui.feature.first_screen
 
 import android.content.Intent
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -22,23 +19,38 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import johan.kovalsikoski.composeplayground.data.ScreenPage
 import johan.kovalsikoski.composeplayground.preview_parameter.MainViewModelPreviewParam
 import johan.kovalsikoski.composeplayground.ui.feature.canvas.CanvasActivity
 import johan.kovalsikoski.composeplayground.ui.theme.ComposePlaygroundTheme
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 
-class MainActivity : ComponentActivity() {
+// TODO: Needs to fix preview
+@Composable
+fun FirstScreen(
+    @PreviewParameter(MainViewModelPreviewParam::class)
+    navController: NavHostController = rememberNavController(),
+    viewModel: FirstScreenViewModel = getViewModel()
+) {
+    val scaffoldState = rememberScaffoldState()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            ComposePlaygroundTheme {
-                MainActivityContent()
+    Scaffold(
+        scaffoldState = scaffoldState,
+        modifier = Modifier.fillMaxSize(),
+        topBar = { TopBar() },
+        bottomBar = { BottomNavigationWithBadgeBox(viewModel) },
+        drawerContent = { DrawerContent() },
+        content = {
+            if (viewModel.getCurrentPage() == ScreenPage.MainPage) {
+                MainContent(viewModel, it)
+            } else {
+                MessageContent(viewModel, it)
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -50,7 +62,7 @@ private fun Greeting(
 }
 
 @Composable
-private fun TopBar(scaffoldState: ScaffoldState) {
+private fun TopBar() {
     val context = LocalContext.current //for any reason this just work here
     val coroutineScope = rememberCoroutineScope()
 
@@ -63,7 +75,7 @@ private fun TopBar(scaffoldState: ScaffoldState) {
             backgroundColor = MaterialTheme.colors.primarySurface,
             navigationIcon = {
                 IconButton(onClick = {
-                    coroutineScope.launch { scaffoldState.drawerState.open() }
+//                    coroutineScope.launch { scaffoldState.drawerState.open() }
                 }) {
                     Icon(Icons.Filled.Menu, "Open drawer menu")
                 }
@@ -86,7 +98,7 @@ private fun TopBar(scaffoldState: ScaffoldState) {
 @Composable
 private fun BottomNavigationWithBadgeBox(
     @PreviewParameter(MainViewModelPreviewParam::class)
-    viewModel: MainViewModel
+    viewModel: FirstScreenViewModel
 ) {
     val context = LocalContext.current
 
@@ -157,31 +169,8 @@ private fun DrawerContent() {
 }
 
 @Composable
-private fun MainActivityContent(
-    @PreviewParameter(MainViewModelPreviewParam::class)
-    viewModel: MainViewModel = getViewModel()
-) {
-    val scaffoldState = rememberScaffoldState()
-
-    Scaffold(
-        scaffoldState = scaffoldState,
-        modifier = Modifier.fillMaxSize(),
-        topBar = { TopBar(scaffoldState) },
-        bottomBar = { BottomNavigationWithBadgeBox(viewModel) },
-        drawerContent = { DrawerContent() },
-        content = {
-            if (viewModel.getCurrentPage() == ScreenPage.MainPage) {
-                MainContent(viewModel, it)
-            } else {
-                MessageContent(viewModel, it)
-            }
-        }
-    )
-}
-
-@Composable
 private fun MessageContent(
-    viewModel: MainViewModel,
+    viewModel: FirstScreenViewModel,
     paddingValues: PaddingValues = PaddingValues(8.dp)
 ) {
     ConstraintLayout(
@@ -214,7 +203,7 @@ private fun MessageContent(
 
 @Composable
 private fun MainContent(
-    viewModel: MainViewModel = getViewModel(),
+    viewModel: FirstScreenViewModel = getViewModel(),
     paddingValues: PaddingValues = PaddingValues(8.dp)
 ) {
     ConstraintLayout(
@@ -292,10 +281,10 @@ private fun MainContent(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showSystemUi = true)
 @Composable
 private fun DefaultPreview() {
     ComposePlaygroundTheme {
-        MainActivityContent()
+        FirstScreen()
     }
 }
