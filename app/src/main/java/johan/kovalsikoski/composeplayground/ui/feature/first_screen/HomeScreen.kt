@@ -15,28 +15,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import johan.kovalsikoski.composeplayground.data.ScreenPage
-import johan.kovalsikoski.composeplayground.preview_parameter.MainViewModelPreviewParam
 import johan.kovalsikoski.composeplayground.ui.feature.canvas.CanvasActivity
-import johan.kovalsikoski.composeplayground.ui.theme.ComposePlaygroundTheme
 import org.koin.androidx.compose.getViewModel
 
+private enum class MyColors(val color: Color) {
+    Red(Color.Red), Green(Color.Green), Blue(Color.Blue)
+}
+
 // TODO: Needs to fix preview
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun FirstScreen(
-    @PreviewParameter(MainViewModelPreviewParam::class)
-    navController: NavHostController = rememberNavController(),
-    viewModel: FirstScreenViewModel = getViewModel()
+fun HomeScreen(
+    navController: NavHostController = rememberNavController()
 ) {
     val scaffoldState = rememberScaffoldState()
-
+    val viewModel: HomeScreenViewModel = getViewModel()
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
@@ -44,7 +43,7 @@ fun FirstScreen(
         bottomBar = { BottomNavigationWithBadgeBox(viewModel) },
         drawerContent = { DrawerContent() },
         content = {
-            if (viewModel.getCurrentPage() == ScreenPage.MainPage) {
+            if (viewModel.getCurrentPage() == ScreenPage.HomePage) {
                 MainContent(viewModel, it)
             } else {
                 MessageContent(viewModel, it)
@@ -97,25 +96,24 @@ private fun TopBar() {
 
 @Composable
 private fun BottomNavigationWithBadgeBox(
-    @PreviewParameter(MainViewModelPreviewParam::class)
-    viewModel: FirstScreenViewModel
+    viewModel: HomeScreenViewModel
 ) {
     val context = LocalContext.current
 
     BottomNavigation {
         BottomNavigationItem(
-            selected = viewModel.getCurrentPage() == ScreenPage.MainPage,
+            selected = viewModel.getCurrentPage() == ScreenPage.HomePage,
             icon = { Icon(Icons.Filled.Person, "Profile") },
             onClick = {
-                viewModel.onPageChange(ScreenPage.MainPage)
+                viewModel.onPageChange(ScreenPage.HomePage)
             }
         )
 
         BottomNavigationItem(
-            selected = viewModel.getCurrentPage() == ScreenPage.MessagePage,
+            selected = viewModel.getCurrentPage() == ScreenPage.ProfilePage,
             icon = {
                 BadgedBox(badge = {
-                    if (viewModel.getCurrentPage() != ScreenPage.MessagePage && viewModel.hasNotifications()) {
+                    if (viewModel.getCurrentPage() != ScreenPage.ProfilePage && viewModel.hasNotifications()) {
                         Badge(backgroundColor = Color.Red) {
                             Text(
                                 text = "${viewModel.getNotificationQuantity()}",
@@ -129,14 +127,10 @@ private fun BottomNavigationWithBadgeBox(
                 }
             },
             onClick = {
-                viewModel.onPageChange(ScreenPage.MessagePage)
+                viewModel.onPageChange(ScreenPage.ProfilePage)
                 Toast.makeText(context, "Message Page Click", Toast.LENGTH_SHORT).show()
             })
     }
-}
-
-enum class MyColors(val color: Color) {
-    Red(Color.Red), Green(Color.Green), Blue(Color.Blue)
 }
 
 @Composable
@@ -170,7 +164,7 @@ private fun DrawerContent() {
 
 @Composable
 private fun MessageContent(
-    viewModel: FirstScreenViewModel,
+    viewModel: HomeScreenViewModel,
     paddingValues: PaddingValues = PaddingValues(8.dp)
 ) {
     ConstraintLayout(
@@ -203,7 +197,7 @@ private fun MessageContent(
 
 @Composable
 private fun MainContent(
-    viewModel: FirstScreenViewModel = getViewModel(),
+    viewModel: HomeScreenViewModel = getViewModel(),
     paddingValues: PaddingValues = PaddingValues(8.dp)
 ) {
     ConstraintLayout(
@@ -278,13 +272,5 @@ private fun MainContent(
         ) {
             Text(text = "ADD NOTIFICATION")
         }
-    }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-private fun DefaultPreview() {
-    ComposePlaygroundTheme {
-        FirstScreen()
     }
 }

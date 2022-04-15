@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import johan.kovalsikoski.composeplayground.data.FirstScreenState
 import johan.kovalsikoski.composeplayground.data.ScreenPage
 
-class FirstScreenViewModel : ViewModel() {
+class HomeScreenViewModel : ViewModel() {
 
     private val _state = mutableStateOf(FirstScreenState())
     val state: State<FirstScreenState> = _state

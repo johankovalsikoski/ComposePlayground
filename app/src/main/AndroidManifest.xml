@@ -12,7 +12,7 @@
         android:theme="@style/Theme.ComposePlayground">
 
         <activity
-            android:name=".ui.feature.HostActivity"
+            android:name=".ui.feature.activity.HostActivity"
             android:exported="true"
             android:theme="@style/Theme.ComposePlayground">
 
