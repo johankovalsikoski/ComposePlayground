@@ -4,15 +4,18 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
-import johan.kovalsikoski.composeplayground.ui.feature.first_screen.HomeScreen
-import johan.kovalsikoski.composeplayground.ui.feature.first_screen.HomeScreenViewModel
+import johan.kovalsikoski.composeplayground.ui.feature.host_activity.HostScreen
+import johan.kovalsikoski.composeplayground.ui.navigation.Destination.HOST_SCREEN
+
 
 @Composable
-fun ProjectNavigationHost(navController: NavHostController, startDestination: String) {
+fun ProjectNavigationHost(
+    navController: NavHostController,
+    startDestination: String = HOST_SCREEN
+) {
     NavHost(navController = navController, startDestination = startDestination) {
-        composable(route = Destination.HOME_SCREEN) {
-            HomeScreen(navController = navController)
+        composable(route = startDestination) {
+            HostScreen(navController)
         }
 //        navigation() - for nested navGraph
     }

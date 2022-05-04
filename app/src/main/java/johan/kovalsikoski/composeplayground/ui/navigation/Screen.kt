@@ -2,10 +2,10 @@ package johan.kovalsikoski.composeplayground.ui.navigation
 
 // Preferred method
 object Destination {
-    const val HOME_SCREEN = "home_screen"
+    const val HOST_SCREEN = "host_screen"
 }
 
 // Alternative method
 sealed class Screen(val route: String) {
-    object Home : Screen(route = "home_screen")
+    object Home : Screen(route = "host_screen")
 }
