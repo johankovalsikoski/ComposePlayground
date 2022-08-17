@@ -10,6 +10,7 @@ class ProjectApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        // TODO: Adding this ToDo to test Bitrise
         startKoin {
             androidContext(this@ProjectApplication)
             modules(viewModelModules)
